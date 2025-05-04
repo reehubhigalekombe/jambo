@@ -1,69 +1,90 @@
 import React, {useState, useRef} from 'react';
 import axios from 'axios';
-import { IconButton,Menu, MenuItem, Avatar } from '@mui/material';
-
+import Avatar from '@mui/material/Avatar';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 function ProfilePic({userId, currentPic, refreshProfile}) {
-    const fileInputRef = useRef(null);
-    const [anchorEl, setAnchorEl] = useState(null);
-    const[preview, setPreview] = useState(currentPic);
-    const handleFileChange = async (e) => {
-        const file = e.target.file[0];
+
+    const fileInputRef = useRef();
+    const[uploading, setUploading] = useState(false);
+
+    const handleUpload = async (e) => {
+        const file = e.target.files[0];
         if(!file) return;
-        const formData = new formData();
-        formData.append("image", file)
-        formData.append("userId", userId)
+
+        const formData = new FormData();
+        formData.append("image", file);
+        formData.append("userId", userId);
+        setUploading(true);
         try {
-            const res = await axios.post("http://localhost:5002/api/users/uploads", formData)
-            setPreview(res.data.imagePath);
-            refreshProfile()
-            handleClose()
+            await axios.post("http://localhost:5002/api/images/uploads", formData);
+            refreshProfile();
+        }catch(err) {
+            console.error(err)
+        } finally{
+            setUploading(false)
+        }
+
+    };
+
+    const handleDelete = async () => {
+        try {
+            await axios.delete(`http://localhost:5002/api/images/${userId}/delete-image`);
+           refreshProfile();
+
         }catch(err) {
             console.error(err)
         }
     }
 
-const handDelete = async () => {
-    try {
-        await axios.delete(`http://localhost:5002/api/users/${userId}/delete-image`);
-        setPreview(null);
-        refreshProfile();
-        handleClose();
-
-    }catch(err) {
-        console.error(err)
-    }
-};
-const handleClick = (e) => setAnchorEl(e.currentTarget)
-const handleClose = () => setAnchorEl(null)
-
   return (
-    <div>
-      <IconButton onClick={handleClick}>
-        <Avatar
-        src={preview ? `http://localhost:5002/${preview}` : "default-profile.png"}
-        sx={{
-            width: 40,
-            height: 40
-        }}
+    <div className='profile-pic'>
+        <input 
+        type='file' accept='image/*'
+        style={{display: "none"}}
+        ref={fileInputRef}
+        onChange={handleUpload}
         />
-      </IconButton>
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem onClick={() => fileInputRef.current.click()}>
-        Upload new
-        </MenuItem>
-        <MenuItem onClick={handDelete}>
-        Delete
-        </MenuItem>
-        <MenuItem onClick={handleClose}>Cancel</MenuItem>
-      </Menu>
 
-      <input 
-      type='text'
-      ref={fileInputRef}
-      accept='image/*'
-      onChange={handleFileChange}
-      />
+        <Avatar
+        src={currentPic ? `http:localhost:5002/${currentPic}` : ""}
+        sx={{
+            width: 50, height: 50, bgcolor: "red", cursor: "pointer"
+        }}
+
+        onClick={() => fileInputRef.current.click()}
+        >
+            {!currentPic && "U"}
+        </Avatar>
+        <IconButton 
+        onClick={handleDelete}
+        size ="small"
+        style={{
+            position: "absolute",
+            bottom: -8, 
+            right: -8,
+            backgroundColor: 'white'
+        }}
+        >
+            <DeleteIcon fontSize="small" />
+
+        </IconButton>
+<IconButton
+onClick={() =>fileInputRef.current.click()}
+size ="small"
+        style={{
+            position: "absolute",
+            bottom: -8, 
+            right: -8,
+            backgroundColor: 'white'
+        }}
+
+>
+    <AddAPhotoIcon fontSize="small"/>
+
+</IconButton>
     </div>
   )
 }

@@ -8,6 +8,7 @@ import {
 import Videos from "./pages/Videos";
 import Chats from "./pages/Chats";
 import Account from "./pages/Account";
+import ProfilePic from "./components/ProfilePic";
 
 
 function App() {
@@ -18,8 +19,9 @@ function App() {
   <Routes>
     <Route path="/home" element={<Home/>}  />
     <Route path="/vidoe" element={<Videos/>}  /> 
-    <Route path="/vidoe" element={<Account/>}  /> 
-    <Route path="/vidoe" element={<Chats/>}  /> 
+    <Route path="/account" element={<Account/>}  /> 
+    <Route path="/chats" element={<Chats/>}  /> 
+    <Route path="/profile" element={<ProfilePic/>}  />
   </Routes>
 </Router>
     </div>
